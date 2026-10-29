@@ -1,0 +1,53 @@
+{
+  "name": "@dropspot/mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for Drop Spot — automated client document collection, file intake, checklist management, and 1-click reviews for Claude Desktop, Cursor, and AI agents.",
+  "type": "module",
+  "homepage": "https://godropspot.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/officialdropspot/dropspot-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude-desktop",
+    "cursor",
+    "antigravity",
+    "file-sharing",
+    "document-collection",
+    "client-portal",
+    "client-intake",
+    "tax-documents",
+    "paperwork-automation",
+    "file-intake"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "smithery.yaml",
+    "glama.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "bin": {
+    "dropspot-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "~5.7.2"
+  }
+}

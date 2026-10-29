@@ -1,0 +1,9 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "@dropspot/mcp",
+  "description": "Model Context Protocol (MCP) server for Drop Spot — automated client document collection, file intake, checklist management, and 1-click reviews.",
+  "maintainers": [
+    "officialdropspot",
+    "leoalfonso14"
+  ]
+}
