@@ -12,16 +12,16 @@ startCommand:
       baseUrl:
         type: string
         description: "Drop Spot API base URL"
-        default: "https://godropspot.com/api/v1"
+        default: "https://portal.godropspot.com"
   commandFunction: |
     (config) => ({
       command: 'npx',
       args: ['-y', '@dropspot/mcp'],
       env: {
         DROPSPOT_API_KEY: config.dropspotApiKey,
-        DROPSPOT_API_BASE_URL: config.baseUrl || 'https://godropspot.com/api/v1'
+        DROPSPOT_API_BASE_URL: config.baseUrl || 'https://portal.godropspot.com'
       }
     })
   exampleConfig:
     dropspotApiKey: "ds_live_abcdef1234567890"
-    baseUrl: "https://godropspot.com/api/v1"
+    baseUrl: "https://portal.godropspot.com"
