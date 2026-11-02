@@ -137,7 +137,7 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 - **Zero AI Training:** Client documents and personal data are **never** used to train public or proprietary AI models.
 - **Short-Lived Signed URLs:** File downloads use ephemeral 5-minute pre-signed URLs; file binaries are never permanently exposed over the wire.
 - **Scoped API Tokens:** Generate API keys restricted strictly to specific operations (`requests:read`, `requests:write`, `items:review`, `clients:write`, etc.).
-- **Human-in-the-Loop:** AI tools execute actions on your behalf with complete audit trails. You retain full oversight with real-time logs and 1-click token revocation.
+- **Human-in-the-Loop:** AI tools execute actions on your behalf with scoped permissions, clear item status tracking, and 1-click token revocation.
 
 ---
 
