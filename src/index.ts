@@ -37,7 +37,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 const server = new Server(
   {
     name: 'dropspot-mcp',
-    version: '1.2.0',
+    version: '1.3.0',
   },
   {
     capabilities: {
@@ -323,6 +323,78 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: ['name', 'email'],
+        },
+      },
+      {
+        name: 'get_clients_csv_template',
+        description:
+          'Retrieve the official Drop Spot CSV template, column specifications, and sample rows for client rosters. AI models can use this schema to mold, map, or normalize arbitrary user spreadsheets into the exact Drop Spot format before importing.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            includeSampleRows: {
+              type: 'boolean',
+              description: 'Whether to include sample client rows in the template (default: true)',
+            },
+          },
+        },
+      },
+      {
+        name: 'import_clients_csv',
+        description:
+          'Batch import a client roster into the workspace directory. Accepts raw CSV text (with intelligent auto-mapping across 50+ synonym headers like TaxDome, Drake, QuickBooks, UltraTax, etc.) or an array of client objects. Automatically deduplicates and merges existing profiles by email.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            csvText: {
+              type: 'string',
+              description: 'Raw CSV text containing client rows to import',
+            },
+            clients: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', description: 'Full name of client' },
+                  email: { type: 'string', description: 'Client email address' },
+                  phone: { type: 'string', description: 'Client phone number' },
+                  company: { type: 'string', description: 'Company or business entity name' },
+                  entityType: { type: 'string', description: 'Tax entity type (e.g. "individual", "s_corp", "c_corp", "partnership", "llc")' },
+                  status: { type: 'string', description: 'Lifecycle status ("active", "extension", "lead", "inactive")' },
+                  maskedId: { type: 'string', description: 'SSN/EIN masked tax ID (e.g. "***-**-1234")' },
+                  stateOfFiling: { type: 'string', description: 'Filing state (e.g. "FL", "NY")' },
+                  taxYear: { type: 'string', description: 'Tax year (e.g. "2026")' },
+                  tags: { type: 'array', items: { type: 'string' }, description: 'Tags' },
+                  pinnedNote: { type: 'string', description: 'Internal pinned notes' },
+                  notes: { type: 'string', description: 'General client notes' },
+                },
+                required: ['name', 'email'],
+              },
+              description: 'Alternative structured array of client objects if already transformed by AI',
+            },
+            columnOverrides: {
+              type: 'object',
+              description: 'Optional mapping of standard fields to custom header names in the CSV',
+            },
+          },
+        },
+      },
+      {
+        name: 'export_clients_csv',
+        description:
+          'Export all client profiles from the workspace directory as an RFC 4180 compliant CSV string, complete with tax entities, filing cadences, and tags.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            tag: {
+              type: 'string',
+              description: 'Optional filter by client tag (e.g. "VIP", "1040")',
+            },
+            status: {
+              type: 'string',
+              description: 'Optional filter by status (e.g. "active", "extension", "lead", "inactive")',
+            },
+          },
         },
       },
       // TEMPLATES MANAGEMENT TOOLS
@@ -728,6 +800,75 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 `• Tags: ${c.tags?.length ? `[${c.tags.join(', ')}]` : 'None'}\n` +
                 `• FYE: ${c.fiscalYearEnd || '12/31'}\n` +
                 `• Pinned Note: ${c.pinnedNote ? `"${c.pinnedNote}"` : 'None'}`,
+            },
+          ],
+        };
+      }
+
+      case 'get_clients_csv_template': {
+        const res = await apiRequest<any>('/clients/template');
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `📋 Drop Spot Client CSV Template Specification:\n\n` +
+                `\`\`\`csv\n${res.templateCsv}\n\`\`\`\n\n` +
+                `Key Field Guidelines for AI Data Molding:\n` +
+                `• Email is required for every client profile.\n` +
+                `• Standard placeholder phone: (123)456-7890\n` +
+                `• Masked IDs strictly show last 4 digits (***-**-XXXX or **-***XXXX)\n` +
+                `• Entity types: individual, s_corp, c_corp, partnership, llc\n\n` +
+                `AI models can mold arbitrary spreadsheet rows into this format and pass them directly to import_clients_csv.`,
+            },
+          ],
+        };
+      }
+
+      case 'import_clients_csv': {
+        const payload: Record<string, any> = {};
+        if (args?.csvText) payload.csv = args.csvText;
+        if (args?.clients) payload.clients = args.clients;
+        if (args?.columnOverrides) payload.columnOverrides = args.columnOverrides;
+
+        const res = await apiRequest<any>('/clients/import', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+
+        const previewList = (res.clients || [])
+          .slice(0, 5)
+          .map((c: any) => `• ${c.name} (${c.email}) - ${c.entity_type || 'individual'}`)
+          .join('\n');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `✅ Successfully imported ${res.imported || 0} client profile(s) into Drop Spot workspace!\n\n` +
+                (previewList ? `Preview of imported clients:\n${previewList}\n\n` : '') +
+                `Clients are now in the directory and ready for 1-click document requests.`,
+            },
+          ],
+        };
+      }
+
+      case 'export_clients_csv': {
+        const params = new URLSearchParams();
+        params.set('format', 'json');
+        if (args?.tag) params.set('tag', String(args.tag));
+        if (args?.status) params.set('status', String(args.status));
+
+        const res = await apiRequest<any>(`/clients/export?${params.toString()}`);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `📁 Exported ${res.count || 0} client profile(s) as RFC 4180 CSV:\n\n` +
+                `\`\`\`csv\n${res.csv}\n\`\`\``,
             },
           ],
         };

@@ -104,7 +104,10 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 
 - *"Create an intake request for Sarah Jenkins using our 2026 Tax Return template."*
 - *"Show me our client list and search for Acme Corp."*
-- *"Update Sarah's phone number to (555) 234-5678 and add a note that she is a VIP client."*
+- *"Get the client CSV template and mold this spreadsheet data into Drop Spot format."*
+- *"Import this CSV of 25 clients from TaxDome into our directory."*
+- *"Export our entire client roster to a CSV file."*
+- *"Update Sarah's phone number to (123) 456-7890 and add a note that she is a VIP client."*
 - *"Check if Sarah uploaded her W-2 form yet."*
 - *"Review Sarah's uploaded W-2 and approve it."*
 - *"Reject item #2 with the note: 'Page 2 is blurry. Please re-upload a clear scan.' "*
@@ -113,7 +116,7 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 
 ---
 
-## 🛠️ Available MCP Tools (12 Tools)
+## 🛠️ Available MCP Tools (15 Tools)
 
 | Tool Name | Description |
 | :--- | :--- |
@@ -125,6 +128,9 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 | `list_clients` | Search and browse your firm's client directory by name, email, company, entity type, status, or tag. |
 | `get_client` | Fetch a client record with full accounting CRM metadata, spouses/linked contacts, tags, and intake history. |
 | `create_or_update_client` | Add a new client or update contact & CRM profile (tax entity, FYE, cadence, state, tags, masked ID, pinned notes, linked contacts). |
+| `get_clients_csv_template` | Inspect the official CSV template, header specifications, and format guidelines so AI can mold arbitrary user spreadsheets into clean Drop Spot format. |
+| `import_clients_csv` | Batch import client rosters from raw CSV text (with 50+ synonym headers & cell heuristics) or structured arrays. Deduplicates and merges profiles by email. |
+| `export_clients_csv` | Export all client profiles as an RFC 4180 compliant CSV string with entity types, filing cadences, and formula injection defenses. |
 | `list_templates` | View your reusable checklist templates (e.g. 1040 Tax Return, KYC, Mortgage Intake). |
 | `get_template` | Inspect a specific checklist template and its default items. |
 | `create_template` | Create a new reusable checklist template with predefined items and categories. |
