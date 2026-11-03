@@ -37,7 +37,7 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 const server = new Server(
   {
     name: 'dropspot-mcp',
-    version: '1.1.0',
+    version: '1.2.0',
   },
   {
     capabilities: {
@@ -188,13 +188,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'list_clients',
         description:
-          'List and search clients in the Drop Spot directory. Filter by name, email, or company.',
+          'List and search clients in the Drop Spot directory. Filter by name, email, company, entity type, status, or tag.',
         inputSchema: {
           type: 'object',
           properties: {
             search: {
               type: 'string',
               description: 'Search string to filter clients by name, email, or company name',
+            },
+            entityType: {
+              type: 'string',
+              enum: ['individual', 's_corp', 'c_corp', 'partnership', 'llc', 'non_profit', 'trust_estate'],
+              description: 'Filter by tax entity classification',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'lead', 'archived'],
+              description: 'Filter by client account status',
+            },
+            tag: {
+              type: 'string',
+              description: 'Filter by specific tag (e.g. "QBO", "Extension Needed")',
             },
             limit: {
               type: 'number',
@@ -206,7 +220,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'get_client',
         description:
-          'Retrieve detailed profile information for a specific client, including their active and historical document requests.',
+          'Retrieve detailed profile and CRM information for a specific client, including tax entity metadata, spouses/linked contacts, tags, pinned accountant note, and active/completed document requests.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -221,13 +235,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: 'create_or_update_client',
         description:
-          'Add a new client to the directory or update an existing client’s contact details, phone, company, or notes.',
+          'Add a new client to the directory or update an existing client with accounting CRM metadata (entity type, filing cadence, FYE, state, tags, masked tax ID, pinned accountant notes, and linked contacts).',
         inputSchema: {
           type: 'object',
           properties: {
             name: {
               type: 'string',
-              description: 'Full name of the client',
+              description: 'Full name of the client (e.g. "Jane Doe")',
             },
             email: {
               type: 'string',
@@ -239,11 +253,73 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             company: {
               type: 'string',
-              description: 'Company or business name',
+              description: 'Company or business entity name',
             },
             notes: {
               type: 'string',
-              description: 'Internal notes about this client',
+              description: 'General internal notes about this client',
+            },
+            entityType: {
+              type: 'string',
+              enum: ['individual', 's_corp', 'c_corp', 'partnership', 'llc', 'non_profit', 'trust_estate'],
+              description: 'Tax entity classification (e.g. "individual" for 1040, "s_corp" for 1120-S, "c_corp" for 1120, "partnership" for 1065)',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'lead', 'archived'],
+              description: 'Account status (defaults to "active")',
+            },
+            fiscalYearEnd: {
+              type: 'string',
+              description: 'Fiscal Year End month/day (e.g. "12/31", "06/30")',
+            },
+            filingCadence: {
+              type: 'string',
+              enum: ['annual', 'quarterly', 'monthly'],
+              description: 'Tax filing frequency',
+            },
+            stateOfFiling: {
+              type: 'string',
+              description: 'US State abbreviation for tax filing (e.g. "FL", "CA", "NY")',
+            },
+            taxYear: {
+              type: 'string',
+              description: 'Current filing tax year (e.g. "2026")',
+            },
+            tags: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Accounting tags (e.g. ["QBO", "Extension Needed", "VIP", "Monthly Books"])',
+            },
+            pinnedNote: {
+              type: 'string',
+              description: 'Sticky internal accountant note (communication quirks, deadline habits)',
+            },
+            qboId: {
+              type: 'string',
+              description: 'QuickBooks Online or Xero accounting customer ID',
+            },
+            taxSoftwareId: {
+              type: 'string',
+              description: 'Drake, UltraTax, or CCH Axcess client ID',
+            },
+            maskedId: {
+              type: 'string',
+              description: 'Masked tax ID / SSN / EIN (last 4 digits only, e.g. "1234" or "***-**-1234")',
+            },
+            linkedContacts: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', description: 'Full name of contact' },
+                  role: { type: 'string', description: 'Role (e.g. "Spouse", "Bookkeeper", "Owner")' },
+                  email: { type: 'string', description: 'Contact email' },
+                  phone: { type: 'string', description: 'Contact phone' },
+                },
+                required: ['name', 'role'],
+              },
+              description: 'Associated contacts, spouses, bookkeepers, or family members',
             },
           },
           required: ['name', 'email'],
@@ -526,23 +602,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // CLIENT HANDLERS
       case 'list_clients': {
         const params = new URLSearchParams();
-        if (args?.search) params.set('search', String(args.search));
-        if (args?.limit) params.set('limit', String(args.limit));
+        if (args?.search) params.set('search', String(args?.search));
+        if (args?.limit) params.set('limit', String(args?.limit));
+        if (args?.entityType) params.set('entityType', String(args?.entityType));
+        if (args?.status) params.set('status', String(args?.status));
 
         const res = await apiRequest<any>(`/clients?${params.toString()}`);
-        const clients = res.data || [];
+        let clients = res.data || [];
+        if (args?.tag) {
+          const searchTag = String(args.tag).toLowerCase();
+          clients = clients.filter((c: any) =>
+            Array.isArray(c.tags) && c.tags.some((t: string) => t.toLowerCase() === searchTag)
+          );
+        }
 
         if (clients.length === 0) {
           return {
-            content: [{ type: 'text', text: 'No clients found matching the search criteria.' }],
+            content: [{ type: 'text', text: 'No clients found in the directory.' }],
           };
         }
 
         const formatted = clients
           .map((c: any) => {
-            const company = c.company ? ` | Company: ${c.company}` : '';
+            const company = c.company ? ` (${c.company})` : '';
             const phone = c.phone ? ` | Phone: ${c.phone}` : '';
-            return `• ${c.name} <${c.email}>${company}${phone}\n  ID: ${c.id}`;
+            const entity = c.entityType ? ` | Entity: ${c.entityType}` : '';
+            const tags = c.tags?.length ? ` | Tags: [${c.tags.join(', ')}]` : '';
+            return `• ${c.name} <${c.email}>${company}${phone}${entity}${tags}\n  ID: ${c.id}`;
           })
           .join('\n\n');
 
@@ -568,13 +654,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             .join('\n');
         }
 
+        let contactsSummary = 'No linked contacts.';
+        if (c.linkedContacts && c.linkedContacts.length > 0) {
+          contactsSummary = c.linkedContacts
+            .map((lc: any) => `  - ${lc.name} (${lc.role}) ${lc.email ? `<${lc.email}>` : ''}`)
+            .join('\n');
+        }
+
         const report =
           `👤 Client Profile: ${c.name}\n` +
           `• ID: ${c.id}\n` +
           `• Email: ${c.email}\n` +
           `• Phone: ${c.phone || 'Not provided'}\n` +
           `• Company: ${c.company || 'Not provided'}\n` +
+          `• Entity Type: ${c.entityType || 'individual'}\n` +
+          `• Status: ${c.status || 'active'}\n` +
+          `• Fiscal Year End: ${c.fiscalYearEnd || '12/31'}\n` +
+          `• Filing Cadence: ${c.filingCadence || 'annual'}\n` +
+          `• State: ${c.stateOfFiling || 'N/A'}\n` +
+          `• Tax Year: ${c.taxYear || '2026'}\n` +
+          `• Masked Tax ID: ${c.maskedId || 'None'}\n` +
+          `• Tags: ${c.tags?.length ? `[${c.tags.join(', ')}]` : 'None'}\n` +
+          `• Pinned Note: ${c.pinnedNote ? `"${c.pinnedNote}"` : 'None'}\n` +
           `• Notes: ${c.notes || 'None'}\n\n` +
+          `Linked Contacts & Family:\n${contactsSummary}\n\n` +
           `Document Intake Requests:\n${requestsSummary}`;
 
         return {
@@ -589,6 +692,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           phone: args?.phone,
           company: args?.company,
           notes: args?.notes,
+          entityType: args?.entityType,
+          status: args?.status,
+          fiscalYearEnd: args?.fiscalYearEnd,
+          filingCadence: args?.filingCadence,
+          stateOfFiling: args?.stateOfFiling,
+          taxYear: args?.taxYear,
+          tags: args?.tags,
+          pinnedNote: args?.pinnedNote,
+          qboId: args?.qboId,
+          taxSoftwareId: args?.taxSoftwareId,
+          maskedId: args?.maskedId,
+          linkedContacts: args?.linkedContacts,
         };
 
         const res = await apiRequest<any>('/clients', {
@@ -607,9 +722,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 `• ID: ${c.id}\n` +
                 `• Name: ${c.name}\n` +
                 `• Email: ${c.email}\n` +
-                `• Phone: ${c.phone || 'N/A'}\n` +
                 `• Company: ${c.company || 'N/A'}\n` +
-                `• Notes: ${c.notes || 'N/A'}`,
+                `• Entity: ${c.entityType || 'individual'}\n` +
+                `• Status: ${c.status || 'active'}\n` +
+                `• Tags: ${c.tags?.length ? `[${c.tags.join(', ')}]` : 'None'}\n` +
+                `• FYE: ${c.fiscalYearEnd || '12/31'}\n` +
+                `• Pinned Note: ${c.pinnedNote ? `"${c.pinnedNote}"` : 'None'}`,
             },
           ],
         };

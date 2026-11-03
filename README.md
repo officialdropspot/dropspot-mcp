@@ -122,9 +122,9 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 | `get_intake_request` | Retrieve complete details of a specific request, including each checklist item, upload statuses, and file metadata. |
 | `review_item` | Review an uploaded file: approve it or reject it with custom feedback to prompt the client for a re-upload. |
 | `get_file_download_link` | Generate a short-lived (5-minute) secure presigned URL to inspect or download an uploaded client file. |
-| `list_clients` | Search and browse your firm's client directory by name, email, or company. |
-| `get_client` | Fetch a client record with their full intake history and metadata. |
-| `create_or_update_client` | Add a new client or update existing contact details (phone, company, notes). |
+| `list_clients` | Search and browse your firm's client directory by name, email, company, entity type, status, or tag. |
+| `get_client` | Fetch a client record with full accounting CRM metadata, spouses/linked contacts, tags, and intake history. |
+| `create_or_update_client` | Add a new client or update contact & CRM profile (tax entity, FYE, cadence, state, tags, masked ID, pinned notes, linked contacts). |
 | `list_templates` | View your reusable checklist templates (e.g. 1040 Tax Return, KYC, Mortgage Intake). |
 | `get_template` | Inspect a specific checklist template and its default items. |
 | `create_template` | Create a new reusable checklist template with predefined items and categories. |

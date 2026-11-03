@@ -1,6 +1,6 @@
 {
   "name": "@dropspot/mcp",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Model Context Protocol (MCP) server for Drop Spot — automated client document collection, file intake, checklist management, and 1-click reviews for Claude Desktop, Cursor, and AI agents.",
   "type": "module",
   "homepage": "https://godropspot.com",
