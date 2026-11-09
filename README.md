@@ -14,7 +14,7 @@ Connect Drop Spot directly to **Claude Desktop**, **Cursor AI**, or **Google Ant
 
 ### 1. Get your Drop Spot API Key
 1. Sign in to your Drop Spot workspace at [godropspot.com](https://godropspot.com).
-2. Go to **Settings** &rarr; **Developer API & MCP**.
+2. Go to **Settings** &rarr; **API / MCP Tooling**.
 3. Click **Generate New API Key**, select your desired scopes (or Full Access), and copy your token (`ds_live_...`).
 
 ---
