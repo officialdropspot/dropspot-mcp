@@ -1,0 +1,33 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.officialdropspot/dropspot-mcp",
+  "title": "Drop Spot",
+  "description": "Passwordless client document intake, checklist tracking, and 1-click file reviews for Drop Spot.",
+  "websiteUrl": "https://godropspot.com",
+  "repository": {
+    "url": "https://github.com/officialdropspot/dropspot-mcp",
+    "source": "github",
+    "subfolder": "packages/mcp-server"
+  },
+  "version": "1.3.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@dropspot/mcp",
+      "version": "1.3.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DROPSPOT_API_KEY",
+          "description": "Drop Spot API key generated in Settings -> Developer & AI (MCP).",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
+
