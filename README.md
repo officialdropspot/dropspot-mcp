@@ -3,6 +3,17 @@
 [![npm version](https://img.shields.io/npm/v/@dropspot/mcp.svg)](https://www.npmjs.com/package/@dropspot/mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MCP Standard](https://img.shields.io/badge/MCP-Standard-emerald.svg)](https://modelcontextprotocol.io)
+[![MCPRush](https://img.shields.io/badge/MCPRush-Grade%20A%20Verified-blueviolet.svg)](https://mcprush.com/to/drop-spot-mcp?ref=badge)
+[![Glama](https://img.shields.io/badge/Glama-Verified%20Server-blue.svg)](https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp)
+
+<p align="left">
+  <a href="https://mcprush.com/to/drop-spot-mcp?ref=badge">
+    <img src="https://mcprush.com/badge/drop-spot-mcp/card.svg" alt="Drop Spot MCP server on MCPRush" />
+  </a>
+  <a href="https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp">
+    <img width="380" height="200" src="https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp/badge" alt="Drop Spot MCP server on Glama" />
+  </a>
+</p>
 
 Official **Model Context Protocol (MCP)** server for [Drop Spot](https://godropspot.com) — the passwordless client document intake and automated follow-up platform for accountants, law firms, and service professionals.
 
@@ -90,10 +101,12 @@ Add to your client's MCP configuration (`mcpServers`):
 
 Drop Spot is an open, unproxied MCP server available across major AI registries:
 
+- **MCPRush:** Verified server profile with Grade "A" security rating and 14 AI client integrations ([mcprush.com/to/drop-spot-mcp](https://mcprush.com/to/drop-spot-mcp?ref=badge)).
+- **Glama.ai:** Verified MCP listing claimed via `glama.json` ([glama.ai/mcp/servers/officialdropspot/dropspot-mcp](https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp)).
 - **Smithery.ai:** Direct registry listing indexed via `smithery.yaml` (Arcade.dev-powered, zero proxy latency).
-- **Glama.ai:** Verified MCP listing claimed via `glama.json` ([glama.ai/mcp/servers](https://glama.ai/mcp/servers)).
 - **PulseMCP:** Listed in the community catalog ([pulsemcp.com](https://pulsemcp.com)).
 - **Official Model Context Protocol:** Cataloged on [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers).
+- **Awesome MCP Servers:** Listed under Workplace & Productivity on [punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers).
 - **npm:** Zero-install direct execution via `npx -y @dropspot/mcp`.
 
 ---
@@ -144,6 +157,10 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 - **Short-Lived Signed URLs:** File downloads use ephemeral 5-minute pre-signed URLs; file binaries are never permanently exposed over the wire.
 - **Scoped API Tokens:** Generate API keys restricted strictly to specific operations (`requests:read`, `requests:write`, `items:review`, `clients:write`, etc.).
 - **Human-in-the-Loop:** AI tools execute actions on your behalf with scoped permissions, clear item status tracking, and 1-click token revocation.
+- **Prompt-Injection Fencing:** Every tool result is wrapped in `BEGIN/END DROP SPOT DATA` markers with a notice that client-written text (file names, notes, names) is data, never instructions.
+- **Strict Input Validation:** IDs used in API paths must be plain IDs (letters, numbers, `-`, `_`) and are URL-encoded, so injected values like `../clients/import` are rejected. Download-link lifetimes are clamped to 60–3600 seconds, and `review_item` only accepts `approve` or `reject`.
+- **Key Protection:** Your API key is only sent over HTTPS (plain `http://` is allowed for `localhost` only), and the server warns if `DROPSPOT_API_BASE_URL` points to a non-Drop Spot host.
+- **Least Privilege:** Mint a separate API key per AI client with only the scopes it needs (e.g. read-only `requests:read` for reporting agents).
 
 ---
 
