@@ -5,6 +5,7 @@
 [![MCP Standard](https://img.shields.io/badge/MCP-Standard-emerald.svg)](https://modelcontextprotocol.io)
 [![MCPRush](https://img.shields.io/badge/MCPRush-Grade%20A%20Verified-blueviolet.svg)](https://mcprush.com/to/drop-spot-mcp?ref=badge)
 [![Glama](https://img.shields.io/badge/Glama-Verified%20Server-blue.svg)](https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Drop%20Spot-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/company/drop-spot/)
 
 <p align="left">
   <a href="https://mcprush.com/to/drop-spot-mcp?ref=badge">
@@ -133,7 +134,7 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 
 | Tool Name | Description |
 | :--- | :--- |
-| `create_intake_request` | Create a new document intake dossier with an itemized checklist. Generates a passwordless magic upload link and optionally emails the client. |
+| `create_intake_request` | Create a new document intake dossier with an itemized checklist. Generates a passwordless magic upload link and optionally emails the client. Set `requireEmailVerification: true` to require a 6-digit emailed code before the client can view or upload. |
 | `list_intake_requests` | List and filter active document requests in the workspace by status or client email. |
 | `get_intake_request` | Retrieve complete details of a specific request, including each checklist item, upload statuses, and file metadata. |
 | `review_item` | Review an uploaded file: approve it or reject it with custom feedback to prompt the client for a re-upload. |

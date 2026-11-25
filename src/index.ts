@@ -161,6 +161,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'boolean',
               description: 'Whether to automatically email the client the invitation link (defaults to true)',
             },
+            requireEmailVerification: {
+              type: 'boolean',
+              description:
+                'When true, the client must enter a 6-digit code emailed to their address on file before the checklist, files or deliverables are shown or uploads are accepted (defaults to false).',
+            },
             items: {
               type: 'array',
               description: 'Checklist of items and documents required from the client',
@@ -614,6 +619,7 @@ async function handleToolCall(request: any): Promise<any> {
           title: args?.title,
           dueAt: args?.dueAt,
           sendInvitationEmail: args?.sendInvitationEmail ?? true,
+          requireEmailVerification: args?.requireEmailVerification ?? false,
           items: args?.items,
         };
 
