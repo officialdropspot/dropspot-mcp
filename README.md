@@ -166,4 +166,4 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 ---
 
 ## 📄 License
-MIT © [Drop Spot Technologies](https://godropspot.com)
+MIT © [Drop Spot Technologies LLC](https://godropspot.com)
