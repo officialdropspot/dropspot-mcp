@@ -18,3 +18,6 @@ pnpm-debug.log*
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Local tooling binaries (never commit)
+*.exe

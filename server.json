@@ -6,8 +6,7 @@
   "websiteUrl": "https://godropspot.com",
   "repository": {
     "url": "https://github.com/officialdropspot/dropspot-mcp",
-    "source": "github",
-    "subfolder": "packages/mcp-server"
+    "source": "github"
   },
   "version": "1.3.1",
   "packages": [
@@ -30,4 +29,3 @@
     }
   ]
 }
-
