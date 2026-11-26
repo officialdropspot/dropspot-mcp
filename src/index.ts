@@ -172,7 +172,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             reviewer: {
               type: 'string',
-              description: 'Optional team member id or email who signs the request off (a Reviewer, Admin or the Owner).',
+              description: 'Optional team member id or email who signs the request off (a Senior Staff, Admin, or Owner, different from assignee).',
             },
             items: {
               type: 'array',
@@ -235,7 +235,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {
             requestId: { type: 'string', description: 'The UUID of the intake request' },
             assignedTo: { type: ['string', 'null'], description: 'Team member id or email, or null to unassign' },
-            reviewer: { type: ['string', 'null'], description: 'Reviewer, Admin or Owner id or email, or null to clear' },
+            reviewer: { type: ['string', 'null'], description: 'Senior Staff, Admin, or Owner id or email (different from assignee), or null to clear' },
           },
           required: ['requestId'],
         },

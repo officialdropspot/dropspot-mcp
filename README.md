@@ -6,6 +6,7 @@
 [![MCPRush](https://img.shields.io/badge/MCPRush-Grade%20A%20Verified-blueviolet.svg)](https://mcprush.com/to/drop-spot-mcp?ref=badge)
 [![Glama](https://img.shields.io/badge/Glama-Verified%20Server-blue.svg)](https://glama.ai/mcp/servers/officialdropspot/dropspot-mcp)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Drop%20Spot-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/company/drop-spot/)
+[![Instagram](https://img.shields.io/badge/Instagram-%40godropspot-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/godropspot/)
 
 <p align="left">
   <a href="https://mcprush.com/to/drop-spot-mcp?ref=badge">
