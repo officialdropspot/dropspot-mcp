@@ -166,6 +166,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 'When true, the client must enter a 6-digit code emailed to their address on file before the checklist, files or deliverables are shown or uploads are accepted (defaults to false).',
             },
+            assignedTo: {
+              type: 'string',
+              description: 'Optional team member id or email who owns the request (see list_team_members). Needs a plan with shared team assignments; the API says which.',
+            },
+            reviewer: {
+              type: 'string',
+              description: 'Optional team member id or email who signs the request off (a Reviewer, Admin or the Owner).',
+            },
             items: {
               type: 'array',
               description: 'Checklist of items and documents required from the client',
@@ -201,11 +209,35 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'Filter by specific client email',
             },
+            assignedTo: {
+              type: 'string',
+              description: 'Filter by assignee: a team member id or email, or "unassigned"',
+            },
             limit: {
               type: 'number',
               description: 'Number of requests to return (default: 20, max: 100)',
             },
           },
+        },
+      },
+      {
+        name: 'list_team_members',
+        description:
+          "List the firm's team members (id, email, role, out-of-office status) so requests can be assigned to the right person.",
+        inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'assign_request',
+        description:
+          'Set who owns an intake request (assignee) and/or who signs it off (reviewer). Pass a team member id or email, or null to clear. The new owner gets an email. Needs a plan with shared team assignments; the API says which.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            requestId: { type: 'string', description: 'The UUID of the intake request' },
+            assignedTo: { type: ['string', 'null'], description: 'Team member id or email, or null to unassign' },
+            reviewer: { type: ['string', 'null'], description: 'Reviewer, Admin or Owner id or email, or null to clear' },
+          },
+          required: ['requestId'],
         },
       },
       {
@@ -621,6 +653,8 @@ async function handleToolCall(request: any): Promise<any> {
           sendInvitationEmail: args?.sendInvitationEmail ?? true,
           requireEmailVerification: args?.requireEmailVerification ?? false,
           items: args?.items,
+          ...(args?.assignedTo ? { assignedTo: String(args.assignedTo) } : {}),
+          ...(args?.reviewer ? { reviewer: String(args.reviewer) } : {}),
         };
 
         const res = await apiRequest<any>('/requests', {
@@ -639,7 +673,10 @@ async function handleToolCall(request: any): Promise<any> {
                 `• Magic Portal URL: ${res.data.portalUrl}\n` +
                 `• Due Date: ${new Date(res.data.dueAt).toLocaleDateString()}\n` +
                 `• Items Requested: ${res.data.items?.length || 0}\n` +
-                `• Invitation Email Sent: ${res.data.invitationEmailSent ? 'Yes' : 'No'}`,
+                `• Invitation Email Sent: ${res.data.invitationEmailSent ? 'Yes' : 'No'}` +
+                (res.data.assignedTo || res.data.reviewer
+                  ? `\n• Assigned To: ${res.data.assignedTo?.email || 'Unassigned'}\n• Reviewer: ${res.data.reviewer?.email || 'None'}`
+                  : ''),
             },
           ],
         };
@@ -649,6 +686,7 @@ async function handleToolCall(request: any): Promise<any> {
         const params = new URLSearchParams();
         if (args?.status) params.set('status', String(args.status));
         if (args?.clientEmail) params.set('client_email', String(args.clientEmail));
+        if (args?.assignedTo) params.set('assigned_to', String(args.assignedTo));
         if (args?.limit) params.set('limit', String(args.limit));
 
         const res = await apiRequest<any>(`/requests?${params.toString()}`);
@@ -663,7 +701,8 @@ async function handleToolCall(request: any): Promise<any> {
         const formatted = requests
           .map((r: any) => {
             return `• [${r.status.toUpperCase()}] ${r.title} — ${r.clientName} (${r.clientEmail})\n` +
-              `  ID: ${r.id} | Progress: ${r.completedItemsCount}/${r.itemsCount} items approved | Due: ${new Date(r.dueAt).toLocaleDateString()}`;
+              `  ID: ${r.id} | Progress: ${r.completedItemsCount}/${r.itemsCount} items approved | Due: ${new Date(r.dueAt).toLocaleDateString()}\n` +
+              `  Assigned: ${r.assignedTo?.email || 'Unassigned'} | Reviewer: ${r.reviewer?.email || 'None'}`;
           })
           .join('\n\n');
 
@@ -702,12 +741,45 @@ async function handleToolCall(request: any): Promise<any> {
           `• ID: ${d.id}\n` +
           `• Client: ${d.clientName} <${d.clientEmail}>\n` +
           `• Status: ${d.status}\n` +
+          `• Assigned To: ${d.assignedTo?.email || 'Unassigned'} | Reviewer: ${d.reviewer?.email || 'None'}\n` +
           `• Progress: ${d.progress.approvedItems}/${d.progress.requiredItems} required items approved (${d.progress.percent}%)\n` +
           `• Due Date: ${new Date(d.dueAt).toLocaleString()}\n\n` +
           `Checklist Items:\n${itemsReport}`;
 
         return {
           content: [{ type: 'text', text: summary }],
+        };
+      }
+
+      case 'list_team_members': {
+        const res = await apiRequest<any>('/team/members');
+        const members = res.data || [];
+        const formatted = members
+          .map(
+            (m: any) =>
+              `• ${m.name} <${m.email}> — ${m.role}${m.away ? ` (out of office${m.awayUntil ? ` until ${new Date(m.awayUntil).toLocaleDateString()}` : ''})` : ''}\n  ID: ${m.id}`
+          )
+          .join('\n');
+        return { content: [{ type: 'text', text: `${members.length} team member${members.length === 1 ? '' : 's'}:\n\n${formatted}` }] };
+      }
+
+      case 'assign_request': {
+        const requestId = pathId(args?.requestId, 'requestId');
+        const body: Record<string, string | null> = {};
+        if (args && Object.prototype.hasOwnProperty.call(args, 'assignedTo')) body.assignedTo = args.assignedTo ? String(args.assignedTo) : null;
+        if (args && Object.prototype.hasOwnProperty.call(args, 'reviewer')) body.reviewer = args.reviewer ? String(args.reviewer) : null;
+        if (Object.keys(body).length === 0) throw new Error('Provide assignedTo and/or reviewer.');
+        const res = await apiRequest<any>(`/requests/${requestId}/assign`, { method: 'PATCH', body: JSON.stringify(body) });
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                `✅ Request ${res.data.id} updated.\n` +
+                `• Assigned To: ${res.data.assignedTo?.email || 'Unassigned'}\n` +
+                `• Reviewer: ${res.data.reviewer?.email || 'None'}`,
+            },
+          ],
         };
       }
 

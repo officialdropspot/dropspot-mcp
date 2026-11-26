@@ -130,13 +130,15 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 
 ---
 
-## 🛠️ Available MCP Tools (15 Tools)
+## 🛠️ Available MCP Tools (17 Tools)
 
 | Tool Name | Description |
 | :--- | :--- |
 | `create_intake_request` | Create a new document intake dossier with an itemized checklist. Generates a passwordless magic upload link and optionally emails the client. Set `requireEmailVerification: true` to require a 6-digit emailed code before the client can view or upload. |
 | `list_intake_requests` | List and filter active document requests in the workspace by status or client email. |
-| `get_intake_request` | Retrieve complete details of a specific request, including each checklist item, upload statuses, and file metadata. |
+| `get_intake_request` | Retrieve complete details of a specific request, including each checklist item, upload statuses, file metadata, assignee and reviewer. |
+| `list_team_members` | List the firm's team members (id, email, role, out-of-office state) so requests can be assigned to the right person. |
+| `assign_request` | Set a request's assignee and/or reviewer by member id or email (`null` clears). The new owner gets an email. Professional plan and up. |
 | `review_item` | Review an uploaded file: approve it or reject it with custom feedback to prompt the client for a re-upload. |
 | `get_file_download_link` | Generate a short-lived (5-minute) secure presigned URL to inspect or download an uploaded client file. |
 | `list_clients` | Search and browse your firm's client directory by name, email, company, entity type, status, or tag. |
