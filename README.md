@@ -135,7 +135,7 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 
 | Tool Name | Description |
 | :--- | :--- |
-| `create_intake_request` | Create a new document intake dossier with an itemized checklist. Generates a passwordless magic upload link and optionally emails the client. Set `requireEmailVerification: true` to require a 6-digit emailed code before the client can view or upload. |
+| `create_intake_request` | Create a new document intake dossier with an itemized checklist. Generates a passwordless magic upload link and optionally emails the client. Supports `portalLocale` (`'en'` \| `'es'`) for English or Spanish client portals/emails (defaults to the client's saved Portal Language, else English) and `requireEmailVerification: true` to require a 6-digit emailed code before the client can view or upload. |
 | `list_intake_requests` | List and filter active document requests in the workspace by status or client email. |
 | `get_intake_request` | Retrieve complete details of a specific request, including each checklist item, upload statuses, file metadata, assignee and reviewer. |
 | `list_team_members` | List the firm's team members (id, email, role, out-of-office state) so requests can be assigned to the right person. |
@@ -144,7 +144,7 @@ Once connected, your AI gains native understanding of your Drop Spot workspace:
 | `get_file_download_link` | Generate a short-lived (5-minute) secure presigned URL to inspect or download an uploaded client file. |
 | `list_clients` | Search and browse your firm's client directory by name, email, company, entity type, status, or tag. |
 | `get_client` | Fetch a client record with full accounting CRM metadata, spouses/linked contacts, tags, and intake history. |
-| `create_or_update_client` | Add a new client or update contact & CRM profile (tax entity, FYE, cadence, state, tags, masked ID, pinned notes, linked contacts). |
+| `create_or_update_client` | Add a new client or update contact & CRM profile (tax entity, FYE, cadence, state, tags, masked ID, pinned notes, linked contacts, and `portalLocale` `'en'` \| `'es'`). |
 | `get_clients_csv_template` | Inspect the official CSV template, header specifications, and format guidelines so AI can mold arbitrary user spreadsheets into clean Drop Spot format. |
 | `import_clients_csv` | Batch import client rosters from raw CSV text (with 50+ synonym headers & cell heuristics) or structured arrays. Deduplicates and merges profiles by email. |
 | `export_clients_csv` | Export all client profiles as an RFC 4180 compliant CSV string with entity types, filing cadences, and formula injection defenses. |

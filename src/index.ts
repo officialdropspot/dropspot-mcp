@@ -157,6 +157,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'ISO 8601 deadline date (optional, defaults to 14 days from now)',
             },
+            portalLocale: {
+              type: 'string',
+              enum: ['en', 'es'],
+              description:
+                'Client upload portal & email language ("en" for English, "es" for Spanish / Español). If omitted, uses the saved portal language on the matching Client Directory profile, else "en".',
+            },
             sendInvitationEmail: {
               type: 'boolean',
               description: 'Whether to automatically email the client the invitation link (defaults to true)',
@@ -416,6 +422,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             taxSoftwareId: {
               type: 'string',
               description: 'Drake, UltraTax, or CCH Axcess client ID',
+            },
+            portalLocale: {
+              type: 'string',
+              enum: ['en', 'es'],
+              description:
+                'Preferred client upload portal & reminder language ("en" for English, "es" for Spanish / Español)',
             },
             maskedId: {
               type: 'string',
